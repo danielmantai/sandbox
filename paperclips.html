@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Paperclips</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #888;
+            font-weight: normal;
+        }
+
+        .paperclip-count {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00d9ff;
+            margin: 8px 0;
+        }
+
+        .paperclip-count span {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .make-btn {
+            width: 100%;
+            padding: 24px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%);
+            border: none;
+            border-radius: 16px;
+            color: #1a1a2e;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: transform 0.1s, opacity 0.1s;
+        }
+
+        .make-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .make-btn:disabled {
+            background: #333;
+            color: #666;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-value.money {
+            color: #00ff88;
+        }
+
+        .price-control {
+            margin-top: 12px;
+        }
+
+        .price-slider {
+            width: 100%;
+            height: 40px;
+            -webkit-appearance: none;
+            background: #2a2a4e;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            background: #00ff88;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .price-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: #2a2a4e;
+            border: 2px solid #00d9ff;
+            border-radius: 12px;
+            color: #00d9ff;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.15s;
+        }
+
+        .buy-btn:active:not(:disabled) {
+            background: #00d9ff;
+            color: #1a1a2e;
+        }
+
+        .buy-btn:disabled {
+            border-color: #333;
+            color: #444;
+            cursor: not-allowed;
+        }
+
+        .buy-btn .cost {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        .demand-bar {
+            height: 8px;
+            background: #2a2a4e;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .demand-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #00ff88);
+            transition: width 0.3s;
+        }
+
+        .auto-info {
+            text-align: center;
+            padding: 8px;
+            color: #00d9ff;
+            font-size: 0.9rem;
+        }
+
+        .per-second {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            margin-top: -16px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Paperclips</h1>
+        <div class="paperclip-count">
+            <span id="clips">0</span>
+            <span>paperclips</span>
+        </div>
+        <div class="per-second" id="perSecond"></div>
+    </div>
+
+    <button class="make-btn" id="makeBtn" onclick="makeClip()">
+        Make Paperclip
+    </button>
+
+    <div class="section">
+        <div class="section-title">Business</div>
+        <div class="stat-row">
+            <span class="stat-label">Funds</span>
+            <span class="stat-value money" id="money">$0.00</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Unsold Inventory</span>
+            <span class="stat-value" id="inventory">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Price per Clip</span>
+            <span class="stat-value" id="priceDisplay">$0.25</span>
+        </div>
+        <div class="price-control">
+            <input type="range" class="price-slider" id="priceSlider"
+                   min="1" max="100" value="25" oninput="updatePrice()">
+            <div class="price-info">
+                <span>$0.01</span>
+                <span>$1.00</span>
+            </div>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Public Demand</span>
+            <span class="stat-value" id="demandPercent">100%</span>
+        </div>
+        <div class="demand-bar">
+            <div class="demand-fill" id="demandBar" style="width: 100%"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Manufacturing</div>
+        <div class="stat-row">
+            <span class="stat-label">Wire</span>
+            <span class="stat-value"><span id="wire">1000</span> inches</span>
+        </div>
+        <button class="buy-btn" id="wireBtn" onclick="buyWire()">
+            Buy Wire (1000 in)<br><span class="cost">$15.00</span>
+        </button>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Automation</div>
+        <div class="stat-row">
+            <span class="stat-label">AutoClippers</span>
+            <span class="stat-value" id="autoClippers">0</span>
+        </div>
+        <div class="auto-info" id="autoInfo"></div>
+        <button class="buy-btn" id="autoBtn" onclick="buyAutoClipper()">
+            Buy AutoClipper<br><span class="cost" id="autoCost">$5.00</span>
+        </button>
+    </div>
+
+    <script>
+        // Game state
+        let state = {
+            clips: 0,
+            totalClips: 0,
+            inventory: 0,
+            money: 0,
+            wire: 1000,
+            price: 0.25,
+            autoClippers: 0,
+            autoClipperCost: 5
+        };
+
+        // Constants
+        const WIRE_COST = 15;
+        const WIRE_AMOUNT = 1000;
+        const WIRE_PER_CLIP = 1;
+
+        // Load saved game
+        function loadGame() {
+            const saved = localStorage.getItem('paperclips_save');
+            if (saved) {
+                state = { ...state, ...JSON.parse(saved) };
+            }
+        }
+
+        // Save game
+        function saveGame() {
+            localStorage.setItem('paperclips_save', JSON.stringify(state));
+        }
+
+        // Calculate demand based on price (0-1)
+        function getDemand() {
+            // Higher price = lower demand
+            // At $0.01, demand is ~100%. At $1.00, demand is ~1%
+            const demand = Math.max(0.01, (1.1 - state.price) / 1.1);
+            return Math.min(1, demand);
+        }
+
+        // Make a paperclip manually
+        function makeClip() {
+            if (state.wire >= WIRE_PER_CLIP) {
+                state.wire -= WIRE_PER_CLIP;
+                state.clips++;
+                state.totalClips++;
+                state.inventory++;
+                updateDisplay();
+            }
+        }
+
+        // Update price from slider
+        function updatePrice() {
+            const slider = document.getElementById('priceSlider');
+            state.price = slider.value / 100;
+            updateDisplay();
+        }
+
+        // Buy wire
+        function buyWire() {
+            if (state.money >= WIRE_COST) {
+                state.money -= WIRE_COST;
+                state.wire += WIRE_AMOUNT;
+                updateDisplay();
+            }
+        }
+
+        // Buy auto clipper
+        function buyAutoClipper() {
+            if (state.money >= state.autoClipperCost) {
+                state.money -= state.autoClipperCost;
+                state.autoClippers++;
+                // Price increases with each purchase
+                state.autoClipperCost = Math.round(5 * Math.pow(1.15, state.autoClippers) * 100) / 100;
+                updateDisplay();
+            }
+        }
+
+        // Update all display elements
+        function updateDisplay() {
+            document.getElementById('clips').textContent = formatNumber(state.clips);
+            document.getElementById('inventory').textContent = formatNumber(state.inventory);
+            document.getElementById('money').textContent = '$' + state.money.toFixed(2);
+            document.getElementById('wire').textContent = formatNumber(state.wire);
+            document.getElementById('priceDisplay').textContent = '$' + state.price.toFixed(2);
+            document.getElementById('autoClippers').textContent = state.autoClippers;
+            document.getElementById('autoCost').textContent = '$' + state.autoClipperCost.toFixed(2);
+
+            const demand = getDemand();
+            document.getElementById('demandPercent').textContent = Math.round(demand * 100) + '%';
+            document.getElementById('demandBar').style.width = (demand * 100) + '%';
+
+            // Update button states
+            document.getElementById('makeBtn').disabled = state.wire < WIRE_PER_CLIP;
+            document.getElementById('wireBtn').disabled = state.money < WIRE_COST;
+            document.getElementById('autoBtn').disabled = state.money < state.autoClipperCost;
+
+            // Auto clipper info
+            if (state.autoClippers > 0) {
+                document.getElementById('autoInfo').textContent =
+                    `Making ${(state.autoClippers * 2).toFixed(1)} clips/sec`;
+                document.getElementById('perSecond').textContent =
+                    `${(state.autoClippers * 2).toFixed(1)} per second`;
+            } else {
+                document.getElementById('autoInfo').textContent = '';
+                document.getElementById('perSecond').textContent = '';
+            }
+        }
+
+        // Format large numbers
+        function formatNumber(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return Math.floor(n).toString();
+        }
+
+        // Game loop - runs every 100ms
+        function gameTick() {
+            // Auto clippers make clips (2 per autoclipper per second = 0.2 per tick)
+            if (state.autoClippers > 0 && state.wire >= WIRE_PER_CLIP) {
+                const clipsToMake = Math.min(
+                    state.autoClippers * 0.2,
+                    state.wire / WIRE_PER_CLIP
+                );
+                state.wire -= clipsToMake * WIRE_PER_CLIP;
+                state.clips += clipsToMake;
+                state.totalClips += clipsToMake;
+                state.inventory += clipsToMake;
+            }
+
+            // Sell clips based on demand
+            const demand = getDemand();
+            // Base sell rate: up to 10 clips per second at 100% demand
+            const maxSell = Math.min(state.inventory, 10 * demand * 0.1);
+            if (maxSell > 0 && Math.random() < demand) {
+                const sold = Math.min(state.inventory, Math.max(0.1, maxSell));
+                state.inventory -= sold;
+                state.money += sold * state.price;
+            }
+
+            updateDisplay();
+        }
+
+        // Save every 5 seconds
+        setInterval(saveGame, 5000);
+
+        // Game tick every 100ms
+        setInterval(gameTick, 100);
+
+        // Initialize
+        loadGame();
+        document.getElementById('priceSlider').value = state.price * 100;
+        updateDisplay();
+    </script>
+</body>
+</html>

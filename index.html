@@ -83,6 +83,33 @@
             color: #666;
             font-style: italic;
         }
+
+        .project-link {
+            display: block;
+            padding: 16px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            color: #00d9ff;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .project-link:hover, .project-link:active {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+        }
+
+        .project-link .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .project-link .desc {
+            font-size: 0.85rem;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -101,7 +128,10 @@
 
         <div class="projects">
             <h2>Projects</h2>
-            <p class="empty-state">Nothing here yet — let's build something!</p>
+            <a href="paperclips.html" class="project-link">
+                <div class="title">Paperclips</div>
+                <div class="desc">Incremental clicker game</div>
+            </a>
         </div>
     </div>
 </body>
